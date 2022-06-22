@@ -6,25 +6,64 @@ import moviesData from "../../common/moviesData/moviesData";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import ImageListItemBar from "@material-ui/core/ImageListItemBar";
+import Filter, { filterObject} from "../filterCard/Filters";
+import genres from "../../common/movieFilterCard/genre";
+import artists from "../../common/movieFilterCard/artists";
 
 class Home extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { moviesData: moviesData };
+        this.state = { 
+            moviesData: moviesData,
+            genres: genres,
+            artists: artists,
+            filterObject: moviesData,
+        };
       }
+
+      filterMovies = () => {
+        if(
+            filterObject.movieName === '' &&
+            filterObject.genres.length === 0 &&
+            filterObject.artists.length === 0
+        ){
+            const newState = this.state;
+            newState.filterObject = moviesData;
+            this.setState(newState);
+
+            return moviesData;
+        }
+        
+        const filteredMovies = this.state.moviesData.filter((movie) => {
+            if(
+                movie.title.toLowerCase() === filterObject.movieName.toLowerCase() || 
+                movie.genres.some((genre) => filterObject.genres.includes(genre)) ||
+                movie.artists.some((artist) =>filterObject.artists.includes(`${artist.first_name} ${artist.last_name}`))
+            ){
+                return movie;
+            }
+        });
+
+        const newState = this.state;
+        newState.filterObject = filteredMovies;
+        this.setState(newState);
+      };
 
     render(){
         return (
             <div>
                 <Header />
+
                 <span className="heading">Upcoming Movies</span>
+                
                 <TitleimageList moviesData={this.state.moviesData} />
 
                 <div className="flex-container">
                     <div className="left">
                     <ImageList cols={4} rowHeight={350}>
-                    {this.state.moviesData.map((item) => (
+
+                    {this.state.filterObject.map((item) => (
                      <ImageListItem key={item.id} className="imageList">
                     <img
                     src={`${item.poster_url}?w=164&h=164&fit=crop&auto=format`}
@@ -33,13 +72,18 @@ class Home extends Component {
                     loading="lazy"
                     />
                     <ImageListItemBar title={item.title} subtitle={`Release Date : ${new Date(item.release_date).toDateString()}`} />
+
                     </ImageListItem>
                     ))}
                     </ImageList>
                     </div>
 
                     <div className="right">
-
+                        <Filter 
+                        genres={this.state.genres}
+                        artists={this.state.artists}
+                        filterMovies={this.filterMovies}
+                        />
                     </div>
                 </div>
             </div>
