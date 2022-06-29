@@ -9,6 +9,7 @@ import ImageListItemBar from "@material-ui/core/ImageListItemBar";
 import Filter, { filterObject} from "../filterCard/Filters";
 import genres from "../../common/movieFilterCard/genre";
 import artists from "../../common/movieFilterCard/artists";
+import { Link } from "react-router-dom";
 
 class Home extends Component {
 
@@ -39,7 +40,7 @@ class Home extends Component {
             if(
                 movie.title.toLowerCase() === filterObject.movieName.toLowerCase() || 
                 movie.genres.some((genre) => filterObject.genres.includes(genre)) ||
-                movie.artists.some((artist) =>filterObject.artists.includes(`${artist.first_name} ${artist.last_name}`))
+                movie.artists.some((artist) =>filterObject.artists.includes(`${artist.first_name} ${artist.last_name}`)) || (new Date(filterObject.releaseDateStart) < new Date(movie.release_date) && new Date(filterObject.releaseDateEnd) > new Date(movie.release_date))
             ){
                 return movie;
             }
@@ -65,6 +66,7 @@ class Home extends Component {
 
                     {this.state.filterObject.map((item) => (
                      <ImageListItem key={item.id} className="imageList">
+                        <Link to='/details' state={{ movie: item }}>
                     <img
                     src={`${item.poster_url}?w=164&h=164&fit=crop&auto=format`}
                     srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
@@ -72,6 +74,7 @@ class Home extends Component {
                     loading="lazy"
                     />
                     <ImageListItemBar title={item.title} subtitle={`Release Date : ${new Date(item.release_date).toDateString()}`} />
+                    </Link>
 
                     </ImageListItem>
                     ))}
